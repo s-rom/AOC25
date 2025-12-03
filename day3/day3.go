@@ -57,14 +57,21 @@ func SliceExclude[T any](s []T, idx int) []T {
 }
 
 /*
-[First idea]
+[Main idea]
 
-Take first 12 elements
-Foreach next num in remainder
+Split the array into two sides: left and right
+Find the max in left, right is the slice starting from maxIdx + 1
+Left is sized so there are at least REM-1 batteries at the right
+Repeat until result has 12 batteries
 
-	Shutdown on of the subset of 12 elements
-	Create a new subset of 12 appending next num
-	Check if new subset value is bigger
+i.e.
+
+If result is empty, remaining = 12
+
+	=> Left = batteries[0:4] because there are AT LEAST 11 (REM - 1) in Right
+		Take max,maxIdx of Left
+		Right = [maxIdx + 1]+
+		Right becomes Batteries
 */
 func Pick12Batteries(bank string) int {
 
@@ -78,53 +85,23 @@ func Pick12Batteries(bank string) int {
 
 		leftEndIdx := len(batteries) - remaining + 1
 		if leftEndIdx == 0 {
-			// Nothing to choose, append batteries to result
+			// Left is empty, append batteries to result
 			result = append(result, batteries...)
 			remaining = 0
 			break
 		}
 
 		leftSide := batteries[0:leftEndIdx]
-		rightSide := batteries[leftEndIdx:]
 
 		max := slices.Max(leftSide)
+		maxIdx := slices.Index(leftSide, max)
 		result = append(result, max)
-
 		remaining--
-		batteries = rightSide
+
+		batteries = batteries[maxIdx+1:]
 	}
 
 	return IntArrayToJoltageValue(result)
-
-	// var subsetOf12 []int = batteries[0:12]
-	// var remainder []int = batteries[12:]
-	// valueOfSubset := IntArrayToJoltageValue(subsetOf12)
-
-	// var bestSubsetOf12 []int = subsetOf12
-	// var bestJoltage = valueOfSubset
-
-	// for _, nextNum := range remainder {
-
-	// 	for subsetIdx := range 12 {
-
-	// 		// Exclude one of the original 12 numbers
-	// 		var newSubsetOf12 []int = SliceExclude(subsetOf12, subsetIdx)
-	// 		// Append next value
-	// 		newSubsetOf12 = append(newSubsetOf12, nextNum)
-	// 		// Recompute new joltage
-	// 		newJoltage := IntArrayToJoltageValue(newSubsetOf12)
-
-	// 		if newJoltage > bestJoltage {
-	// 			bestSubsetOf12 = newSubsetOf12
-	// 			bestJoltage = newJoltage
-	// 		}
-	// 	}
-
-	// 	subsetOf12 = bestSubsetOf12
-	// 	valueOfSubset = bestJoltage
-	// }
-
-	// return valueOfSubset
 }
 
 func Pick2Batteries(bank string) int {
@@ -183,10 +160,7 @@ func Part2(data []string) int64 {
 
 func main() {
 
-	data := readData("test_input.txt")
+	data := readData("input.txt")
+	fmt.Printf("Part 1: %d\n", Part1(data))
 	fmt.Printf("Part 2: %d\n", Part2(data))
-	// fmt.Printf("%v\n", total)
-
-	// fmt.Println(Pick12Batteries("234234234234278"))
-
 }
