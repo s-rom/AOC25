@@ -107,17 +107,7 @@ func Pick12Batteries(bank string) int {
 func Pick2Batteries(bank string) int {
 
 	// Convert bank to int[]
-	batteries := make([]int, 0, len(bank))
-
-	for _, val := range bank {
-
-		intVal, err := strconv.Atoi(string(val))
-		if err != nil {
-			panic("Error parsing char " + string(val))
-		}
-
-		batteries = append(batteries, intVal)
-	}
+	var batteries []int = BankStrToIntArray(bank)
 
 	var max2 int
 	max := slices.Max(batteries[0 : len(batteries)-1])
