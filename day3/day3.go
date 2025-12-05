@@ -75,7 +75,7 @@ If result is empty, remaining = 12
 */
 func Pick12Batteries(bank string) int {
 
-	// // Convert bank to int[]
+	// Convert bank to int[]
 	var batteries []int = BankStrToIntArray(bank)
 	var result []int = make([]int, 0, 12)
 
