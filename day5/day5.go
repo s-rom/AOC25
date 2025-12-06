@@ -47,6 +47,14 @@ func IntersectRange(a IngredientRange, b IngredientRange) IngredientRange {
 	}
 }
 
+// Only works if ranges intersect
+func MergeRange(a IngredientRange, b IngredientRange) IngredientRange {
+	return IngredientRange{
+		Start: min(a.Start, b.Start),
+		End:   max(a.End, b.End),
+	}
+}
+
 func TestIntersection(a IngredientRange, b IngredientRange) bool {
 	return a.IsInRange(b.Start) || a.IsInRange(b.End) || b.IsInRange(a.Start) || b.IsInRange(a.End)
 }
@@ -111,28 +119,61 @@ func Part1(data IngredientData) uint64 {
 	return total
 }
 
-func Part2(data IngredientData) uint64 {
+func TryMerge(data []IngredientRange) ([]IngredientRange, uint64) {
 
-	total := uint64(0)
-	for idxA, rangeA := range data.Ranges {
+	rangeProcessed := make(map[IngredientRange]bool)
+	result := make([]IngredientRange, 0, 200)
+	totalMerges := uint64(0)
 
-		total += rangeA.RangeLength()
+	for idxA, rangeA := range data {
 
-		for idxB := idxA + 1; idxB < len(data.Ranges); idxB++ {
-			rangeB := &data.Ranges[idxB]
+		// Check any candidate for merging
+		for idxB := idxA + 1; idxB < len(data); idxB++ {
+			rangeB := &data[idxB]
+
+			if rangeProcessed[*rangeB] {
+				continue
+			}
 
 			if TestIntersection(rangeA, *rangeB) {
-				intersection := IntersectRange(rangeA, *rangeB)
-				total -= intersection.RangeLength()
+				rangeProcessed[*rangeB] = true // B was merged
+				rangeProcessed[rangeA] = true  // A was merged
+				result = append(result, MergeRange(rangeA, *rangeB))
+				totalMerges++
+				break
 			}
 		}
+
+		// As rangeA was not merged, append it to the result
+		if !rangeProcessed[rangeA] {
+			result = append(result, rangeA)
+		}
+
+	}
+
+	return result, totalMerges
+
+}
+
+func Part2(data IngredientData) uint64 {
+	// Try to merge until no ranges can be merged
+	newRanges, totalMerges := TryMerge(data.Ranges)
+
+	for totalMerges > 0 {
+		newRanges, totalMerges = TryMerge(newRanges)
+	}
+
+	total := uint64(0)
+	for _, ingredientRange := range newRanges {
+		total += ingredientRange.RangeLength()
 	}
 
 	return total
+
 }
 
 func main() {
-	filePath := "input.txt"
+	filePath := "input_test.txt"
 	if len(os.Args) > 1 {
 		filePath = os.Args[1]
 	}
