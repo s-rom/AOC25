@@ -5,8 +5,7 @@ My solutions for Advent of Code 2025
 
 ### Day 7
 
-[Part1]("https://files.catbox.moe/gv4hos.mp4")
-
+<video src="https://files.catbox.moe/gv4hos.mp4" controls width="640" height="480"></video>
 ---
 
 ## Solutions
@@ -20,6 +19,7 @@ My solutions for Advent of Code 2025
 | Day 5 | [Go](day5/day5.go)     | Go  |    ⭐⭐  | |
 | Day 6 | [Go](day6/day6.go)     | Go  |    ⭐⭐  | |
 | Day 7 | [Go](day7/day7.go)     | Go  |    ⭐⭐  | |
+
 
 
 
