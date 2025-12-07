@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"strings"
 
 	"log"
@@ -47,7 +48,7 @@ func ParseGrid(filePath string) *Grid[string] {
 	return grid
 }
 
-func Propagate(grid *Grid[string], queue []Position) (uint64, []Position) {
+func PropagateBreadth(grid *Grid[string], queue []Position) (uint64, []Position) {
 
 	// Empty queue
 	if len(queue) == 0 {
@@ -102,15 +103,51 @@ func Part1(grid *Grid[string]) uint64 {
 
 	var splits uint64
 	for len(queue) != 0 {
-		splits, queue = Propagate(grid, queue)
+		splits, queue = PropagateBreadth(grid, queue)
 		total += splits
 	}
 	return total
 }
 
+func CountPossiblePaths(grid *Grid[string], cache map[Position]uint64, from Position) uint64 {
+	paths := uint64(0)
+
+	// At last row
+	if grid.Rows-1 == from.Row {
+		return 1
+	}
+
+	// downPosition := MoveDown(from)
+	if !grid.IsValidPosition(from) {
+		return 0
+	}
+
+	if val, ok := cache[from]; ok {
+		// fmt.Print("Cache hit\n")
+		return val
+	}
+
+	ptr := grid.GetPtrAt(from)
+
+	switch *ptr {
+	case ".":
+		paths += CountPossiblePaths(grid, cache, MoveDown(from))
+	case "^":
+		paths += CountPossiblePaths(grid, cache, MoveLeft(from))
+		paths += CountPossiblePaths(grid, cache, MoveRight(from))
+	}
+
+	cache[from] = paths
+
+	return paths
+}
+
+type Path []Position
+
 func Part2(grid *Grid[string]) uint64 {
 	total := uint64(0)
-
+	cache := make(map[Position]uint64)
+	total = CountPossiblePaths(grid, cache, MoveDown(FindStartPosition(grid)))
 	return total
 }
 
@@ -122,11 +159,12 @@ func main() {
 
 	// rawData := readData(filePath)
 	data := ParseGrid(filePath)
-	// // data := ParseData(readData(filePath))
-	// var part1 uint64 = Part1(data)
-	// var part2 uint64 = Part2(data)
+	data2 := ParseGrid(filePath)
+	// data := ParseData(readData(filePath))
+	var part1 uint64 = Part1(data)
+	var part2 uint64 = Part2(data2)
 
-	// fmt.Printf("Part 1: %d\nPart 2: %d\n", part1, part2)
+	fmt.Printf("Part 1: %d\nPart 2: %d\n", part1, part2)
 
 	StartViz(data)
 

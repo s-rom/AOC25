@@ -123,10 +123,10 @@ func StartViz(grid *Grid[string]) {
 	m.Queue = append(m.Queue, MoveDown(FindStartPosition(grid)))
 
 	var splits, total uint64
-	splits, m.Queue = Propagate(grid, m.Queue)
+	splits, m.Queue = PropagateBreadth(grid, m.Queue)
 	for len(m.Queue) != 0 {
 		total += splits
-		splits, m.Queue = Propagate(grid, m.Queue)
+		splits, m.Queue = PropagateBreadth(grid, m.Queue)
 	}
 
 	m.TotalSplits = total
