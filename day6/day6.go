@@ -97,8 +97,8 @@ func Part2(rawData []string) uint64 {
 	total := uint64(0)
 
 	operations := make([]string, 0, 50)
-	opTokens := strings.Split(rawData[len(rawData)-1], " ")
-	for _, op := range opTokens {
+	opTokens := strings.SplitSeq(rawData[len(rawData)-1], " ")
+	for op := range opTokens {
 		if op != "" {
 			operations = append(operations, op)
 		}

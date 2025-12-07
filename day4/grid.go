@@ -20,14 +20,14 @@ func (p Position) Add(other Position) Position {
 	return Position{Row: p.Row + other.Row, Column: p.Column + other.Column}
 }
 
-var up = Position{Row: 0, Column: -1}
-var down = Position{Row: 0, Column: +1}
-var left = Position{Row: -1, Column: 0}
-var right = Position{Row: +1, Column: 0}
+var up = Position{Row: -1, Column: 0}
+var down = Position{Row: +1, Column: 0}
+var left = Position{Row: 0, Column: -1}
+var right = Position{Row: 0, Column: +1}
 
 var upLeft = Position{Row: -1, Column: -1}
-var downLeft = Position{Row: -1, Column: +1}
-var upRight = Position{Row: +1, Column: -1}
+var downLeft = Position{Row: +1, Column: -1}
+var upRight = Position{Row: -1, Column: +1}
 var downRight = Position{Row: +1, Column: +1}
 
 func NewGrid[T any](rows int, columns int) *Grid[T] {
