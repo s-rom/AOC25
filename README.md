@@ -5,7 +5,9 @@ My solutions for Advent of Code 2025
 
 ### Day 7
 
-**Part 1**
+
+https://github.com/user-attachments/assets/adf9af0c-6c44-4bf1-b19e-3e3e6ed99b91
+
 
 
 ---
@@ -21,5 +23,10 @@ My solutions for Advent of Code 2025
 | Day 5 | [Go](day5/day5.go)     | Go  |    ⭐⭐  | |
 | Day 6 | [Go](day6/day6.go)     | Go  |    ⭐⭐  | |
 | Day 7 | [Go](day7/day7.go)     | Go  |    ⭐⭐  | |
+
+
+
+
+
 
 
