@@ -7,6 +7,9 @@ My solutions for Advent of Code 2025
 
 **Part 1**
 
+<video src="https://github.com/s-rom/AOC25/blob/c30ce22d3e3883317fe4d2d14ffdeed54c3b2138/viz/day7_part1.mp4" controls>
+  Tu navegador no soporta la etiqueta de video.
+</video>
 
 ---
 
@@ -21,5 +24,6 @@ My solutions for Advent of Code 2025
 | Day 5 | [Go](day5/day5.go)     | Go  |    ⭐⭐  | |
 | Day 6 | [Go](day6/day6.go)     | Go  |    ⭐⭐  | |
 | Day 7 | [Go](day7/day7.go)     | Go  |    ⭐⭐  | |
+
 
 
