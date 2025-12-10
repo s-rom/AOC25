@@ -25,7 +25,7 @@ https://github.com/user-attachments/assets/adf9af0c-6c44-4bf1-b19e-3e3e6ed99b91
 | Day 7 | [Go](day7/day7.go)     | Go  |    ⭐⭐  | |
 | Day 8 | [Go](day8/day8.go)     | Go  |    ⭐⭐  | For part1, an attempt counts as a connection |
 | Day 9 | [Go](day9/day9.go)     | Go  |    ⭐⭐ | Gave up on part2 solution and decided to study someone's else approach. I'll revisit this problem later. [EDIT: 10/12/2025] Part2 was the closest aoc problem to make me give up|
-
+| Day 10 | [Go](day10/day10.go)     | Go  |    ⭐  | For part1, sorting the buttons by quantity of toggles increases the BFS |
 
 
 

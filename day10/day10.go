@@ -7,8 +7,6 @@ import (
 	"math"
 	"os"
 	"regexp"
-	"slices"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -18,30 +16,14 @@ var pattern = regexp.MustCompile(`\[(.*)\] (.*) \{(.*)\}`)
 const ON = true
 const OFF = false
 
-type LightSet []bool
-type Button []int
+type LightSet uint32
+type Button uint32 // Toggle mask
 
 type MachineSchema struct {
 	Goal                LightSet
-	Buttons             []Button
+	ButtonMasks         []Button
 	JoltageRequirements []int
 }
-
-// func (m MachineSchema) String() string {
-// var builder strings.Builder
-
-// builder.WriteRune('[')
-// for _, light := range m.Goal {
-// if light {
-// builder.WriteRune('#')
-// } else {
-// builder.WriteRune('.')
-// }
-// }
-// builder.WriteString("]\n")
-
-// return builder.String()
-// }
 
 func readData(filePath string) []string {
 	file, err := os.Open(filePath)
@@ -60,28 +42,22 @@ func readData(filePath string) []string {
 	return buffer
 }
 
-func NewLightSet(size int) LightSet {
-	set := make(LightSet, size)
-	for i := range size {
-		set[i] = OFF
-	}
-	return set
+func NewLightSet() LightSet {
+	return LightSet(0)
+}
+
+func PressButton(set LightSet, button Button) LightSet {
+	return set ^ LightSet(button)
 }
 
 func IsGoalAchieved(m *MachineSchema, pressSequence []int) bool {
-	testSet := NewLightSet(len(m.Goal))
+	testSet := LightSet(0)
 	for _, buttonIndex := range pressSequence {
-		for _, lightIdx := range m.Buttons[buttonIndex] {
-			testSet[lightIdx] = !testSet[lightIdx] // toggle light
-		}
+		button := m.ButtonMasks[buttonIndex]
+		testSet = PressButton(testSet, button)
 	}
 
-	for i := range m.Goal {
-		if testSet[i] != m.Goal[i] {
-			return false
-		}
-	}
-	return true
+	return m.Goal == testSet
 }
 
 func DeepCopySlice(other []int) []int {
@@ -90,32 +66,33 @@ func DeepCopySlice(other []int) []int {
 	return newSlice
 }
 
-func ParseLightSet(s string) LightSet {
-	set := make(LightSet, 0, len(s))
+func ParseLightSet(str string) LightSet {
+	set := LightSet(0)
 
-	for _, s := range s {
-		var value bool
-		if s == '.' {
-			value = OFF
-		} else {
-			value = ON
+	for idx, s := range str {
+		if s == '#' {
+			set = set | 1
 		}
-		set = append(set, value)
+
+		if idx < len(str)-1 {
+			set = set << 1
+		}
 	}
 	return set
 }
 
-func ParseButtons(s string) []Button {
+func ParseButtons(s string, totalLights int) []Button {
 	buttons := make([]Button, 0, 10)
 
 	tokens := strings.SplitSeq(s, " ")
 	for token := range tokens {
-		button := make(Button, 0, 10)
+		button := Button(0)
 		// remove first and last => ( and )
 		token = token[1 : len(token)-1]
 		for numStr := range strings.SplitSeq(token, ",") {
 			num, _ := strconv.Atoi(numStr)
-			button = append(button, num)
+			unsigned := uint32(1) << uint32(totalLights-1-num)
+			button = button | Button(unsigned)
 		}
 		buttons = append(buttons, button)
 	}
@@ -140,7 +117,7 @@ func ParseData(data []string) []MachineSchema {
 
 		machine := MachineSchema{
 			Goal:                ParseLightSet(match[1]),
-			Buttons:             ParseButtons(match[2]),
+			ButtonMasks:         ParseButtons(match[2], len(match[1])),
 			JoltageRequirements: ParseJoltage(match[3]),
 		}
 		machines = append(machines, machine)
@@ -148,24 +125,23 @@ func ParseData(data []string) []MachineSchema {
 	return machines
 }
 
-func key(slice []int) string {
-	slices.Sort(slice)
-	var builder strings.Builder
-	for _, n := range slice {
-		str := strconv.Itoa(n)
-		builder.WriteString(str)
-	}
-	return builder.String()
-}
+// func key(slice []int) string {
+// 	slices.Sort(slice)
+// 	var builder strings.Builder
+// 	for _, n := range slice {
+// 		str := strconv.Itoa(n)
+// 		builder.WriteString(str)
+// 	}
+// 	return builder.String()
+// }
 
 func MinNumberOfPresses(m *MachineSchema) int {
 
 	minNumber := math.MaxInt
 	queue := make([][]int, 0, 10)
-	cache := make(map[string]int)
 	// Enqueue one sequence for each button available.
 	// Test just one button press first
-	for buttonIndex := range m.Buttons {
+	for buttonIndex := range m.ButtonMasks {
 		buttonSequence := make([]int, 0, 10)
 		buttonSequence = append(buttonSequence, buttonIndex)
 		queue = append(queue, buttonSequence)
@@ -174,13 +150,6 @@ func MinNumberOfPresses(m *MachineSchema) int {
 	for len(queue) > 0 {
 		front := queue[0]
 		queue = queue[1:] // pop
-		key := key(front)
-
-		if val, found := cache[key]; found {
-			if val >= minNumber {
-				continue
-			}
-		}
 
 		// If the current button sequence is bigger than the minium, skip it
 		if len(front) > minNumber {
@@ -189,13 +158,12 @@ func MinNumberOfPresses(m *MachineSchema) int {
 
 		if IsGoalAchieved(m, front) {
 			presses := len(front)
-			cache[key] = presses
 			if presses < minNumber {
 				minNumber = presses
 			}
 		}
 
-		for buttonIndex := range m.Buttons {
+		for buttonIndex := range m.ButtonMasks {
 
 			// Avoid pressing the last button again
 			if buttonIndex == front[len(front)-1] {
@@ -232,6 +200,7 @@ func Part2(data []string) uint64 {
 }
 
 func main() {
+
 	filePath := "input_test.txt"
 	if len(os.Args) > 1 {
 		filePath = os.Args[1]
@@ -239,12 +208,17 @@ func main() {
 
 	rawData := readData(filePath)
 	machines := ParseData(rawData)
+	// m1 := machines[0]
+	// set := LightSet(0)
+	// set = PressButton(set, m1.ButtonMasks[0])
+	// set = PressButton(set, m1.ButtonMasks[1])
+	// set = PressButton(set, m1.ButtonMasks[2])
 
-	for _, m := range machines {
-		sort.Slice(m.Buttons, func(i, j int) bool {
-			return len(m.Buttons[i]) < len(m.Buttons[j])
-		})
-	}
+	// fmt.Println(strconv.FormatInt(int64(set), 2))
+
+	// for _, m := range machines {
+	// 	slices.Sort(m.Buttons)
+	// }
 
 	var part1 uint64 = Part1(machines)
 	var part2 uint64 = Part2(rawData)
