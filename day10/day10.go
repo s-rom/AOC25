@@ -7,6 +7,8 @@ import (
 	"math"
 	"os"
 	"regexp"
+	"slices"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -170,6 +172,11 @@ func MinNumberOfPresses(m *MachineSchema) int {
 				continue
 			}
 
+			idx := slices.Index(front, buttonIndex)
+			if idx != -1 {
+				continue
+			}
+
 			newSequence := DeepCopySlice(front)
 			newSequence = append(newSequence, buttonIndex)
 			queue = append(queue, newSequence)
@@ -188,7 +195,7 @@ func Part1(data []MachineSchema) uint64 {
 		total += uint64(n)
 
 		progress++
-		fmt.Println(float64(progress) / float64(len(data)) * 100.0)
+		// fmt.Println(float64(progress) / float64(len(data)) * 100.0)
 	}
 	return total
 }
@@ -216,9 +223,11 @@ func main() {
 
 	// fmt.Println(strconv.FormatInt(int64(set), 2))
 
-	// for _, m := range machines {
-	// 	slices.Sort(m.Buttons)
-	// }
+	for _, m := range machines {
+		sort.Slice(m.ButtonMasks, func(i, j int) bool {
+			return m.ButtonMasks[j] > m.ButtonMasks[i]
+		})
+	}
 
 	var part1 uint64 = Part1(machines)
 	var part2 uint64 = Part2(rawData)
